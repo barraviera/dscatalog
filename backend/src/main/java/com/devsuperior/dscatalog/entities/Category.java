@@ -1,13 +1,24 @@
 package com.devsuperior.dscatalog.entities;
 
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.util.Objects;
 
+// A anotação @Entity trata esta classe como um mapeamento para uma tabela
+@Entity
+// A anotação @Table indica que esta classe irá representar uma tabela no banco de dados
+@Table(name = "tb_category")
 public class Category implements Serializable {
 
     // Atributos
 
+    // Anotação pra informar qual atributo será o id
+    @Id
+    // Anotação pra deixar o id auto incrementado
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
 
     // Construtor vazio
