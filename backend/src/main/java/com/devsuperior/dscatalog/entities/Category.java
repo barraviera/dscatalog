@@ -11,6 +11,8 @@ import java.util.Objects;
 @Table(name = "tb_category")
 public class Category implements Serializable {
 
+    private static final Long serialVersionUID = 1L;
+
     // Atributos
 
     // Anotação pra informar qual atributo será o id
