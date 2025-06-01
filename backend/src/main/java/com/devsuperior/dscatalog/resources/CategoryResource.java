@@ -6,6 +6,7 @@ import com.devsuperior.dscatalog.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,5 +37,19 @@ public class CategoryResource {
         // Vamos retornar uma resposta
         return ResponseEntity.ok().body(list);
     }
+
+    // Buscar categoria por id
+    // Com esta anotação ficará /categories/id
+    @GetMapping(value = "/{id}")
+    // @PathVariable faz com que pegue a variavel informada na rota e coloque no parametro
+    public ResponseEntity<CategoryDTO> findById(@PathVariable Long id) {
+
+        // Vamos usar o service.findById(); para chamar o metodo que busca categorias por id
+        CategoryDTO dto = service.findById(id);
+
+        // Vamos retornar uma resposta
+        return ResponseEntity.ok().body(dto);
+    }
+
 
 }

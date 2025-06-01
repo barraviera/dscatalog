@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 // Essa anotação registrará esta classe como um componente que vai participar da injeção de dependência do spring
@@ -34,6 +35,19 @@ public class CategoryService {
         // .collect(Collectors.toList()); = agora vamos converter o stream novamente para uma lista
         return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
 
+    }
+
+    // Busca categoria por id
+    @Transactional(readOnly = true)
+    public CategoryDTO findById(Long id) {
+
+        // O objeto Optional apareceu no java 8 pra evitar trabalhar com valor nulo
+        // e quem retorna este tipo Optional é o metodo do Jpa findById, que nunca retornará um objeto nulo, podendo ter ou não uma categoria dentro
+        Optional<Category> obj = repository.findById(id);
+        // Obter o objeto que está dentro do Optional
+        Category entity = obj.get();
+        // Retornamos o resultado como um CategoryDTO
+        return new CategoryDTO(entity);
     }
 
 }
