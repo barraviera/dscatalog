@@ -46,7 +46,6 @@ public class CategoryResource {
 
         // Vamos usar o service.findById(); para chamar o metodo que busca categorias por id
         CategoryDTO dto = service.findById(id);
-
         // Vamos retornar uma resposta
         return ResponseEntity.ok().body(dto);
     }

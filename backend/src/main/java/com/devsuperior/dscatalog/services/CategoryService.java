@@ -3,6 +3,7 @@ package com.devsuperior.dscatalog.services;
 import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
+import com.devsuperior.dscatalog.services.exceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,9 @@ public class CategoryService {
         // e quem retorna este tipo Optional é o metodo do Jpa findById, que nunca retornará um objeto nulo, podendo ter ou não uma categoria dentro
         Optional<Category> obj = repository.findById(id);
         // Obter o objeto que está dentro do Optional
-        Category entity = obj.get();
+        // Usando o orElseThrow, caso nao tenha um objeto Category ele permite informarmos uma excessao
+        // Criamos a nossa excessao EntityNotFoundException pra quando buscar um id que nao existe
+        Category entity = obj.orElseThrow(() -> new EntityNotFoundException("Entidade não encontrada"));
         // Retornamos o resultado como um CategoryDTO
         return new CategoryDTO(entity);
     }
