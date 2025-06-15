@@ -5,11 +5,10 @@ import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +47,25 @@ public class CategoryResource {
         CategoryDTO dto = service.findById(id);
         // Vamos retornar uma resposta
         return ResponseEntity.ok().body(dto);
+    }
+
+    // Metodo para inserir categoria
+    // Receberemos como parametro um objeto do tipo CategoryDTO. É preciso colocar a anotação @RequestBody
+    // A anotação @PostMapping é para quando for inserir
+    @PostMapping
+    public ResponseEntity<CategoryDTO> insert(@RequestBody CategoryDTO dto) {
+
+        // No CategoryService teremos o metodo insert que recebe um CategoryDTO para fazer a inserção no banco
+        dto = service.insert(dto);
+
+        // Montamos o recurso
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(dto.getId())
+                .toUri();
+
+        // Vamos retornar uma resposta
+        // Iremos usar como resposta o created 201 passando a uri do recurso ex. http://localhost:8080/categories/4
+        return ResponseEntity.created(uri).body(dto);
     }
 
 

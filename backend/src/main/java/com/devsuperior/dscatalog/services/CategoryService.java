@@ -53,4 +53,17 @@ public class CategoryService {
         return new CategoryDTO(entity);
     }
 
+    // Metodo para inserir categoria no banco de dados
+    public CategoryDTO insert(CategoryDTO dto) {
+
+        // Criamos um objeto
+        Category entity = new Category();
+        // Vamos converter de dto para Category
+        entity.setName(dto.getName());
+        // Agora vamos salvar o objeto no banco
+        entity = repository.save(entity);
+
+        // agora temos que retornar a entidade como forma de CategoryDTO
+        return new CategoryDTO(entity);
+    }
 }
