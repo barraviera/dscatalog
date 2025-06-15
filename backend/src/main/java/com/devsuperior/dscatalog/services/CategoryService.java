@@ -3,12 +3,12 @@ package com.devsuperior.dscatalog.services;
 import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
-import com.devsuperior.dscatalog.services.exceptions.EntityNotFoundException;
+import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,12 +48,13 @@ public class CategoryService {
         // Obter o objeto que está dentro do Optional
         // Usando o orElseThrow, caso nao tenha um objeto Category ele permite informarmos uma excessao
         // Criamos a nossa excessao EntityNotFoundException pra quando buscar um id que nao existe
-        Category entity = obj.orElseThrow(() -> new EntityNotFoundException("Entidade não encontrada"));
+        Category entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entidade não encontrada"));
         // Retornamos o resultado como um CategoryDTO
         return new CategoryDTO(entity);
     }
 
     // Metodo para inserir categoria no banco de dados
+    @Transactional
     public CategoryDTO insert(CategoryDTO dto) {
 
         // Criamos um objeto
@@ -65,5 +66,29 @@ public class CategoryService {
 
         // agora temos que retornar a entidade como forma de CategoryDTO
         return new CategoryDTO(entity);
+    }
+
+    @Transactional
+    public CategoryDTO update(Long id, CategoryDTO dto) {
+
+        try {
+
+            // Iremos buscar a categoria pelo id usando o getReferenceById do proprio spring
+            // Importante: quando vamos atualizar, usamos o getReferenceById para buscar, pois ele nao toca no banco, ele instancia um objeto provisório
+            // e só quando mandamos salvar é que ele efetivamento toca no banco usando recurso. Diferente de usar o findById, que consumirá recurso para buscar
+            // a categoria e depois novamente para salvar a categoria atualizada
+            Category entity = repository.getReferenceById(id);
+            // Set um novo nome que veio por parametro pra categoria buscada
+            entity.setName(dto.getName());
+            // Salvando a categoria atualizada no banco
+            entity = repository.save(entity);
+
+            // Retornamos a entidade convertida pra CategoryDTO
+            return new CategoryDTO(entity);
+
+        } catch (EntityNotFoundException e) { // A excessao EntityNotFoundException se da quando tentamos salvar o objeto retornado do getReferenceById mas que o id nao existia
+            // Agora vamos lançar a nossa excessao personalizada
+            throw new ResourceNotFoundException("Id not found " + id);
+        }
     }
 }

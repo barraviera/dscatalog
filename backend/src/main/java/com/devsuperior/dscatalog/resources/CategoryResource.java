@@ -68,5 +68,21 @@ public class CategoryResource {
         return ResponseEntity.created(uri).body(dto);
     }
 
+    // Metodo para atualizar categoria
+    // A anotação @PutMapping é para quando for atualizar
+    // Este metodo precisa receber o id da categoria a ser editada
+    // e tambem o corpo da requisição @RequestBody CategoryDTO dto
+    // Este metodo irá retornar um CategoryDTO como mostra em ResponseEntity<CategoryDTO>
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<CategoryDTO> update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
+
+        // No CategoryService teremos o metodo update que recebe um id e um CategoryDTO para fazer a atualização no banco
+        dto = service.update(id, dto);
+
+        // Vamos retornar uma resposta
+        return ResponseEntity.ok().body(dto);
+
+    }
+
 
 }
