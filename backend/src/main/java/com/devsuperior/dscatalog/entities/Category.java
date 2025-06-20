@@ -3,6 +3,7 @@ package com.devsuperior.dscatalog.entities;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
 
 // A anotação @Entity trata esta classe como um mapeamento para uma tabela
@@ -20,8 +21,15 @@ public class Category implements Serializable {
     // Anotação pra deixar o id auto incrementado
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
+
+    // Armazenar na coluna createdAt sem especificar o timezone (padrao UTC)
+    // ex. se aqui for 14:00h ele armazenará como 17:00h, depois quando buscarmos esse registro teremos que fazer essa conversao para -3
+    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
+    private Instant createdAt; // o tipo Instant armazena data e hora
+
+    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
+    private Instant updatedAt;
 
     // Construtor vazio
 
@@ -45,6 +53,28 @@ public class Category implements Serializable {
         return name;
     }
 
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+
+    // Sempre quando chamarmos o save do Jpa e for a primeira vez ele vai executar esse PrePersist e
+    // salvará no banco o momento em que foi criado o registro
+    @PrePersist
+    public void prePersist() {
+        createdAt = Instant.now();
+    }
+
+    // Aqui sempre que formos atualizar ele vai atualizar o valor do updatedAt com o momento atual
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
+
     // Setter
 
     public void setId(Long id) {
@@ -54,6 +84,7 @@ public class Category implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
 
     // outro metodo de comparação mais garantido porem mais lento pra comparar se um objeto é igual a outro
 
