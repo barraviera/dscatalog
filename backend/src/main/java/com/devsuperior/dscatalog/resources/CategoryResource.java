@@ -84,5 +84,18 @@ public class CategoryResource {
 
     }
 
+    // Metodo para deletar categoria
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<CategoryDTO> delete(@PathVariable Long id) {
+
+        // No CategoryService teremos o metodo update que recebe um id e um CategoryDTO para fazer a atualização no banco
+        service.delete(id);
+
+        // Vamos retornar a resposta sem corpo, pois no delete nao precisamos
+        // será retornado um 204 -> retorno deu certo e o corpo será vazio
+        return ResponseEntity.noContent().build();
+
+    }
+
 
 }

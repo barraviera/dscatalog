@@ -3,10 +3,13 @@ package com.devsuperior.dscatalog.services;
 import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
+import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -90,5 +93,27 @@ public class CategoryService {
             // Agora vamos lançar a nossa excessao personalizada
             throw new ResourceNotFoundException("Id not found " + id);
         }
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void delete(Long id) {
+
+        // Se nao existir o id recebido por parametro...
+        if(!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
+
+        // Mas se passou pela verificação acima, iremos no try tentar deletar a categoria pelo id recebido por parametro
+        try {
+            repository.deleteById(id);
+
+        } catch (DataIntegrityViolationException e) {
+            // Caso tentemos deletar um id que nao existe o erro será capturado pelo DataIntegrityViolationException
+            // e lançaremos uma excessao personalizada DatabaseException
+            // Explicando o que é Integridade Redefencial. Se temos vários produtos que são vinculados a uma categoria, e apagamos esta categoria
+            // os produtos terão o id da categoria, mas ela nao vai existir, causando um problema de referencia no banco de dados
+            throw new DatabaseException("Falha de integridade referencial");
+        }
+
     }
 }
