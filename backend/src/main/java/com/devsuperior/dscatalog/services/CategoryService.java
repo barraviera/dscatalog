@@ -8,6 +8,8 @@ import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,16 +30,18 @@ public class CategoryService {
     // Usado em metodos que apenas leem dados findAll(), findById()...
     @Transactional(readOnly = true)
     // Metodo que busca todas as categorias e tem como retorno uma lista do tipo CategoryDTO
-    public List<CategoryDTO> findAll() {
-        // esse .findAll() ja é um metodo de busca pronto do Jpa, é só nós utilizarmos
+    public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
+        // esse .findAll() ja é um metodo de busca pronto do Jpa, é só nós utilizarmos ele vai aceitar paginacao tambem, nao precisamos criar um
+        // metodo personalizado
         // vamos atribuir os resultados à uma lista de Category
-        List<Category> list = repository.findAll();
+        Page<Category> list = repository.findAll(pageRequest);
 
         // Vamos usar o .stream para converter a lista em um stream que permite trabalhar com funções de alta ordem(lambdas)
         // no caso, vamos usar o .map que transforma cada elemento original da nossa lisa em uma outra coisa, aplicando uma função a cada elemento da lista
         // x -> new CategoryDTO(x) = pra cada elemento da lista convertemos ele em um CategoryDTO
         // .collect(Collectors.toList()); = agora vamos converter o stream novamente para uma lista
-        return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
+        // Como o Page ja é um stream do java 8, vamos remover list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList()); o strem e o collect
+        return list.map(x -> new CategoryDTO(x));
 
     }
 
@@ -95,6 +99,7 @@ public class CategoryService {
         }
     }
 
+    // Metodo para deletar categoria pelo id
     @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
 
