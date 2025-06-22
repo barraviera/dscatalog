@@ -4,6 +4,7 @@ import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
@@ -25,6 +26,8 @@ public class ProductService {
     // Para fazer as buscas precisaremos da instacia do ProductRepository
     @Autowired
     private ProductRepository repository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     // Anotação que indica que as operações são somente leitura no banco. Isso ajuda o Spring a otimizar o desempenho e a evitar bloqueios desnecessários.
     // Usado em metodos que apenas leem dados findAll(), findById()...
@@ -69,8 +72,12 @@ public class ProductService {
 
         // Criamos um objeto
         Product entity = new Product();
-        // Vamos converter de dto para Product
+
         // entity.setName(dto.getName());
+        // Para nao ter que ficar fazendo setName, setPrice, etc aqui no insert e no update
+        // vamos criar um metodo auxiliar copyDtoToEntity que faça isso
+        copyDtoToEntity(entity, dto);
+
         // Agora vamos salvar o objeto no banco
         entity = repository.save(entity);
 
@@ -88,8 +95,10 @@ public class ProductService {
             // e só quando mandamos salvar é que ele efetivamento toca no banco usando recurso. Diferente de usar o findById, que consumirá recurso para buscar
             // a categoria e depois novamente para salvar a categoria atualizada
             Product entity = repository.getReferenceById(id);
-            // Set um novo nome que veio por parametro pra categoria buscada
+
             // entity.setName(dto.getName());
+            copyDtoToEntity(entity, dto);
+
             // Salvando a categoria atualizada no banco
             entity = repository.save(entity);
 
@@ -121,6 +130,36 @@ public class ProductService {
             // Explicando o que é Integridade Redefencial. Se temos vários produtos que são vinculados a uma categoria, e apagamos esta categoria
             // os produtos terão o id da categoria, mas ela nao vai existir, causando um problema de referencia no banco de dados
             throw new DatabaseException("Falha de integridade referencial");
+        }
+    }
+
+    // Este metodo auxiliar receberá como parametro um objeto Product
+    // e um Product DTO, ele vai copiar os dados do ProductDTO para o Product
+    // Esse metodo será private e outras classes nao poderão acessa-lo
+    private void copyDtoToEntity(Product entity, ProductDTO dto) {
+
+        entity.setName(dto.getName());
+        entity.setPrice(dto.getPrice());
+        entity.setDescription(dto.getDescription());
+        entity.setDate(dto.getDate());
+        entity.setImgUrl(dto.getImgUrl());
+
+        // Primeiro vamos limpar a lista de categorias
+        entity.getCategories().clear();
+
+        // vamos percorrer a lista de categorias que chegou via paramatro ProductDTO dto
+        // vamos acessar essa lista usando o dto.getCategories() e percorrer a lista
+        // chamando cada elemento de catDTO
+        // usamos a classe categoryRepository pra usar o metodo getReferenceById do spring
+        // este getReferenceById instancia um objeto provisorio sem tocar no banco
+        for (CategoryDTO catDTO : dto.getCategories()) {
+
+            // Categoria instanciada
+            Category category = categoryRepository.getReferenceById(catDTO.getId());
+            // Agora vamos associar as cetegorias localizadas, dentro da entitdade de Product
+            entity.getCategories().add(category);
+            // no final, chamando este metodo copyDtoToEntity, teremos um objeto Product pronto
+            // para ser salva ou atualizar quando precisar
         }
 
     }
