@@ -6,6 +6,7 @@ import com.devsuperior.dscatalog.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,20 +34,22 @@ public class CategoryResource {
     @GetMapping
     public ResponseEntity<Page<CategoryDTO>> findAll(
             // Usando o @RequestParam informamos que sao parametros opcionais
-            @RequestParam(value = "page", defaultValue = "0") Integer page,
-            @RequestParam(value = "linesPerPage", defaultValue = "12") Integer linesPerPage,
-            @RequestParam(value = "direction", defaultValue = "ASC") String direction,
-            @RequestParam(value = "orderBy", defaultValue = "name") String orderBy
-
+            // @RequestParam(value = "page", defaultValue = "0") Integer page,
+            // @RequestParam(value = "linesPerPage", defaultValue = "12") Integer linesPerPage,
+            // @RequestParam(value = "direction", defaultValue = "ASC") String direction,
+            // @RequestParam(value = "orderBy", defaultValue = "name") String orderBy
+            // Vamos usar o pageable ao inves de informar parametro por parametro como acima
+            Pageable pageable
     ) {
         // O direction veio como string e vamos converter para o tipo Direction do spring
-        PageRequest pageRequest = PageRequest.of(page, linesPerPage, Sort.Direction.valueOf(direction), orderBy);
+        // apos usar o Pageable pageable nao precisamos mais dessa linha
+        //PageRequest pageRequest = PageRequest.of(page, linesPerPage, Sort.Direction.valueOf(direction), orderBy);
 
         // Vamos usar o service.findAll(); para chamar o metodo que busca todas as categorias
         // e guardamos em um List de Category
         // Vamos trocar o nome do metodo service de findAll para findAllPaged
         // e o tipo de retorno nao será mais um List como List<CategoryDTO>, mas sim um Page como Page<CategoryDTO>
-        Page<CategoryDTO> list = service.findAllPaged(pageRequest);
+        Page<CategoryDTO> list = service.findAllPaged(pageable);
 
         // Vamos retornar uma resposta
         return ResponseEntity.ok().body(list);

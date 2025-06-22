@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +34,16 @@ public class ProductService {
     // Usado em metodos que apenas leem dados findAll(), findById()...
     @Transactional(readOnly = true)
     // Metodo que busca todas as categorias e tem como retorno uma lista do tipo CategoryDTO
-    public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
+    public Page<ProductDTO> findAllPaged(
+            // PageRequest pageRequest
+            // ao inves de usarmos PageRequest, vamos usar o Pageable, pois estamos
+            // usando ele em ProductResource no metodo findAll
+            Pageable pageable
+    ) {
         // esse .findAll() ja é um metodo de busca pronto do Jpa, é só nós utilizarmos ele vai aceitar paginacao tambem, nao precisamos criar um
         // metodo personalizado
         // vamos atribuir os resultados à uma lista de Category
-        Page<Product> list = repository.findAll(pageRequest);
+        Page<Product> list = repository.findAll(pageable);
 
         // Vamos usar o .stream para converter a lista em um stream que permite trabalhar com funções de alta ordem(lambdas)
         // no caso, vamos usar o .map que transforma cada elemento original da nossa lisa em uma outra coisa, aplicando uma função a cada elemento da lista
