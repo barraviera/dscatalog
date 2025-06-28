@@ -10,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.Optional;
 
+// Nesta classe fizemos um teste de integração, pois carregamos por exemplo o ProductRepository, o Product, etc
+// diferente do teste de unidade que não fazemos esse carregamento, mas sim usamos o Mockito igual no ProductService
 @DataJpaTest
 public class ProductRepositoryTests {
 
