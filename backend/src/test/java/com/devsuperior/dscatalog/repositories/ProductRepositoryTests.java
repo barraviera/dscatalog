@@ -1,6 +1,7 @@
 package com.devsuperior.dscatalog.repositories;
 
 import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.tests.Factory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ public class ProductRepositoryTests {
     private ProductRepository repository;
 
     private long existingId;
+    private long countTotalProducts;
 
     // Metodos
 
@@ -27,6 +29,8 @@ public class ProductRepositoryTests {
 
         // esta variavel com o id 1 será inicializada antes de cada teste
         existingId = 1L;
+        // vamos dar um valor pra variavel countTotalProducts
+        countTotalProducts = 25L;
     }
 
     @Test
@@ -42,6 +46,23 @@ public class ProductRepositoryTests {
         // testamos se nao está presente um objeto dentro do result
         // Não é pra ter objeto dentro da variavel result pois nós efetuamos a exclusao pelo id
         Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    // testar o save quando o id do objeto é nulo
+    public void saveShouldPersistWithAutoincrementWhenIdIsNull() {
+
+        // Vamos chamar a classe fabrica que criamos e usar o metodo createProduct
+        Product product = Factory.createProduct();
+        // vamos setar um id nulo pra testar
+        product.setId(null);
+        // vamos salvar no banco com o id nulo
+        product = repository.save(product);
+        // Vamos testar se o id do produto salvo nao é nulo
+        Assertions.assertNotNull(product.getId());
+        // Criamos uma variavel countTotalProducts e demos o valor pra simular que a quantidade de produtos sao 25
+        // agora vamos testar se o product.getId() é 26 ou seja countTotalProducts + 1
+        Assertions.assertEquals(countTotalProducts + 1, product.getId());
     }
 
 }
