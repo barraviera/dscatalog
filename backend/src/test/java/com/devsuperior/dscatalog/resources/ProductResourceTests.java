@@ -4,6 +4,7 @@ import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.services.ProductService;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import com.devsuperior.dscatalog.tests.Factory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -39,6 +42,11 @@ public class ProductResourceTests {
     private Long existingId;
     private Long nonExistingId;
 
+    // Vamos usar pra converter um ProductDTO para um json pra passar na requisição put do
+    // teste updateShouldReturnProductDTOWhenIdExist
+    @Autowired
+    private ObjectMapper objectMapper;
+
     // SIMULADOR ---
 
     // Simuladores, que executa antes de cada metodo de teste
@@ -62,6 +70,11 @@ public class ProductResourceTests {
         when(service.findById(existingId)).thenReturn(productDTO);
         // Quando chamarmos o findById do ProductService passando um id inexistente ele deve lançar a excessao ResourceNotFoundException
         when(service.findById(nonExistingId)).thenThrow(ResourceNotFoundException.class);
+
+        // Simular update do ProductService com um id existente
+        when(service.update(eq(existingId), any())).thenReturn(productDTO);
+        // Simular o update com um id inexistente
+        when(service.update(eq(nonExistingId), any())).thenThrow(ResourceNotFoundException.class);
     }
 
     // METODOS/TESTES ---
@@ -102,6 +115,44 @@ public class ProductResourceTests {
                 .accept(MediaType.APPLICATION_JSON));
 
         // Verificar se retornou um status NotFound
+        result.andExpect(status().isNotFound());
+    }
+
+    // quando chamar o metodo update da classe ProductResource quando passar um id existente deveria retornar um ProductDTO
+    @Test
+    public void updateShouldReturnProductDTOWhenIdExist() throws Exception {
+
+        // Converter um objeto ProductDTO em json
+        String jsonBody = objectMapper.writeValueAsString(productDTO);
+
+        // o put é uma requisição que tem um corpo(body)
+        ResultActions result = mockMvc.perform(put("/products/{id}", existingId)
+                .content(jsonBody) // corpo da requisição
+                .contentType(MediaType.APPLICATION_JSON) // tipo do corpo da requisição
+                .accept(MediaType.APPLICATION_JSON)); // tipo do retorno da resposta
+
+        // Verificar se retornou um status Ok
+        result.andExpect(status().isOk());
+        // testando se o objeto que voltou na resposta tem id, name, description
+        result.andExpect(jsonPath("$.id").exists());
+        result.andExpect(jsonPath("$.name").exists());
+        result.andExpect(jsonPath("$.description").exists());
+    }
+
+    // quando o id nao existe
+    @Test
+    public void updateShouldReturnNotFoundWhenIdDoesNotExist() throws Exception {
+
+        // Converter um objeto ProductDTO em json
+        String jsonBody = objectMapper.writeValueAsString(productDTO);
+
+        // o put é uma requisição que tem um corpo(body)
+        ResultActions result = mockMvc.perform(put("/products/{id}", nonExistingId)
+                .content(jsonBody) // corpo da requisição
+                .contentType(MediaType.APPLICATION_JSON) // tipo do corpo da requisição
+                .accept(MediaType.APPLICATION_JSON)); // tipo do retorno da resposta
+
+        // Verificar se retornou um status Ok
         result.andExpect(status().isNotFound());
     }
 
