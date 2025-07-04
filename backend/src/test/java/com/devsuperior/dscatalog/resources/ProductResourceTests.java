@@ -2,9 +2,11 @@ package com.devsuperior.dscatalog.resources;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.services.ProductService;
+import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import com.devsuperior.dscatalog.tests.Factory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.mockito.Mockito.*;
+
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,6 +43,7 @@ public class ProductResourceTests {
     private ProductDTO productDTO;
     private Long existingId;
     private Long nonExistingId;
+    private Long dependentId;
 
     // Vamos usar pra converter um ProductDTO para um json pra passar na requisição put do
     // teste updateShouldReturnProductDTOWhenIdExist
@@ -55,6 +58,7 @@ public class ProductResourceTests {
 
         existingId = 1L;
         nonExistingId = 2L;
+        dependentId = 3L;
 
         // Usamos a classe Factory que criamos para nos auxiliar
         productDTO = Factory.createProductDTO();
@@ -75,6 +79,16 @@ public class ProductResourceTests {
         when(service.update(eq(existingId), any())).thenReturn(productDTO);
         // Simular o update com um id inexistente
         when(service.update(eq(nonExistingId), any())).thenThrow(ResourceNotFoundException.class);
+
+        // Lembre-se: veja o metodo delete do ProductService e veja que seu retorno é void
+        // entao 1º falamos a consequencia (doNothing) e depois o when
+        // Entao fica: não faça nada quando chamar o delete com id existente
+        doNothing().when(service).delete(existingId);
+        // Simular delete quando o id é inexistente
+        doThrow(ResourceNotFoundException.class).when(service).delete(nonExistingId);
+        // Lance a excessao DatabaseException quando chamar o metodo delete com um id que é dependente
+        // ou seja, está em outra tabela e se apagado dará erro como falha de integridade
+        doThrow(DatabaseException.class).when(service).delete(dependentId);
     }
 
     // METODOS/TESTES ---
@@ -152,8 +166,33 @@ public class ProductResourceTests {
                 .contentType(MediaType.APPLICATION_JSON) // tipo do corpo da requisição
                 .accept(MediaType.APPLICATION_JSON)); // tipo do retorno da resposta
 
-        // Verificar se retornou um status Ok
+        // Verificar se retornou um status "não encontrado"
         result.andExpect(status().isNotFound());
     }
+
+    @Test
+    // Deverá retornar no content quando chamar o delete com um id existente
+    public void deleteShouldReturnNoContentWhenIdExists() throws Exception {
+        mockMvc.perform(delete("/products/{id}", existingId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    // quando chamar o delete do ProductResource passando um id inexistente deveria retornar um ResourceNotFoundException
+    public void deleteShouldReturnResourceNotFoundExceptionWhenIdDoesNotExists() throws Exception {
+
+        // chamar a requisição do tipo delete passando um id inexistente
+        ResultActions result = mockMvc.perform(delete("/products/{id}", nonExistingId));
+
+        // Verificar se retornou um status "não encontrado 404" ResourceNotFoundException
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteShouldReturnBadRequestWhenDependentId() throws Exception {
+        mockMvc.perform(delete("/products/{id}", dependentId))
+                .andExpect(status().isBadRequest());
+    }
+
 
 }
