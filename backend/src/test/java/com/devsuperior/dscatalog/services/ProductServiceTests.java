@@ -119,7 +119,6 @@ public class ProductServiceTests {
             // Mockito.when(repository.existsById(nonExistingId)).thenReturn(false);
             // caindo na Assertions.assertThrows(ResourceNotFoundException.class, () -> { passando o teste como correto
             service.delete(nonExistingId);
-
         });
     }
 
