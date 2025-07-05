@@ -182,7 +182,8 @@ public class ProductResourceTests {
     public void deleteShouldReturnResourceNotFoundExceptionWhenIdDoesNotExists() throws Exception {
 
         // chamar a requisição do tipo delete passando um id inexistente
-        ResultActions result = mockMvc.perform(delete("/products/{id}", nonExistingId));
+        ResultActions result = mockMvc.perform(delete("/products/{id}", nonExistingId)
+                .accept(MediaType.APPLICATION_JSON));
 
         // Verificar se retornou um status "não encontrado 404" ResourceNotFoundException
         result.andExpect(status().isNotFound());
