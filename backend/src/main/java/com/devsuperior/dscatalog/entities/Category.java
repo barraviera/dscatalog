@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 // A anotação @Entity trata esta classe como um mapeamento para uma tabela
 @Entity
@@ -30,6 +32,11 @@ public class Category implements Serializable {
 
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant updatedAt;
+
+    // O mappedBy faz o mapeamento inverso do que está em Product @ManyToMany
+    @ManyToMany(mappedBy = "categories")
+    // Lista de produtos que uma categoria pode ter
+    private Set<Product> products = new HashSet<>();
 
     // Construtor vazio
 
@@ -59,6 +66,10 @@ public class Category implements Serializable {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Set<Product> getProducts() {
+        return products;
     }
 
 
