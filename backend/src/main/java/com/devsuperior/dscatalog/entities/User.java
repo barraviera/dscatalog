@@ -25,12 +25,17 @@ public class User implements Serializable {
 
     private String firstName;
     private String lastName;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
 
     // Anotação pra indicar que o relacionamento será de N:N muitos pra muitos
     // ou seja 1 user pode ter varias roles e 1 role pode ter varios users
-    @ManyToMany
+    // fetch = FetchType.EAGER usado pra forçar e sempre quando buscar um usuario no banco
+    // ja vai vir junto os roles(perfis) deste usuario. Obs. precisamos disso para o srping security
+    @ManyToMany(fetch = FetchType.EAGER)
     // Anotação pra indicar a tabela intermediaria que chamaremos de tb_user_role
     @JoinTable(name = "tb_user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     // Lista de permissoes que 1 usuario pode ter
