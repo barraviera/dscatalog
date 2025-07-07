@@ -1,22 +1,38 @@
 package com.devsuperior.dscatalog.entities;
 
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+// A anotação @Entity trata esta classe como um mapeamento para uma tabela
+@Entity
+// A anotação @Table indica que esta classe irá representar uma tabela no banco de dados
+@Table(name = "tb_user")
 public class User implements Serializable {
 
     private static final Long serialVersionUID = 1L;
 
     // Atributos
 
+    // Anotação pra informar qual atributo será o id
+    @Id
+    // Anotação pra deixar o id auto incrementado
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String firstName;
     private String lastName;
     private String email;
     private String password;
 
+    // Anotação pra indicar que o relacionamento será de N:N muitos pra muitos
+    // ou seja 1 user pode ter varias roles e 1 role pode ter varios users
+    @ManyToMany
+    // Anotação pra indicar a tabela intermediaria que chamaremos de tb_user_role
+    @JoinTable(name = "tb_user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     // Lista de permissoes que 1 usuario pode ter
     private Set<Role> roles = new HashSet<>();
 
