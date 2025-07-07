@@ -2,6 +2,7 @@ package com.devsuperior.dscatalog.resources;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.services.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -68,8 +69,9 @@ public class ProductResource {
     // Metodo para inserir categoria
     // Receberemos como parametro um objeto do tipo ProductDTO. É preciso colocar a anotação @RequestBody
     // A anotação @PostMapping é para quando for inserir
+    // Vamos usar o @Valid pra funcionar as validações que fizemos em ProductDTO
     @PostMapping
-    public ResponseEntity<ProductDTO> insert(@RequestBody ProductDTO dto) {
+    public ResponseEntity<ProductDTO> insert(@Valid @RequestBody ProductDTO dto) {
 
         // No ProductService teremos o metodo insert que recebe um ProductDTO para fazer a inserção no banco
         dto = service.insert(dto);
@@ -90,7 +92,7 @@ public class ProductResource {
     // e tambem o corpo da requisição @RequestBody ProductDTO dto
     // Este metodo irá retornar um ProductDTO como mostra em ResponseEntity<ProductDTO>
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ProductDTO> update(@PathVariable Long id, @RequestBody ProductDTO dto) {
+    public ResponseEntity<ProductDTO> update(@Valid @PathVariable Long id, @RequestBody ProductDTO dto) {
 
         // No ProductService teremos o metodo update que recebe um id e um ProductDTO para fazer a atualização no banco
         dto = service.update(id, dto);
