@@ -5,6 +5,8 @@ import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -42,6 +44,33 @@ public class ResourceExceptionHandler {
         error.setError("Database exception");
         error.setMessage(e.getMessage());
         error.setPath(request.getRequestURI()); // pega o caminho da requisição que deu erro
+
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationError> validation(MethodArgumentNotValidException e, HttpServletRequest request) {
+
+        // UNPROCESSABLE_ENTITY erro 422
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+
+        ValidationError error = new ValidationError();
+        error.setTimestamp(Instant.now());
+        error.setStatus(status.value()); // UNPROCESSABLE_ENTITY é o erro 422
+        error.setError("Validation exception");
+        error.setMessage(e.getMessage());
+        error.setPath(request.getRequestURI()); // pega o caminho da requisição que deu erro
+
+        // Retorna uma lista do tipo FieldErrors
+        // Pra cada elemento da lista de erros e.getBindingResult().getFieldErrors()
+        // nós vamos usar o metodo addError da classe ValidationError pra adicionar
+        // o campo e a mensagem na lista ist<FieldMessage> errors = new ArrayList<>();
+        for (FieldError f : e.getBindingResult().getFieldErrors()) {
+
+            // pegar o nome do campo f.getField()
+            // pegar a mensagem de erro f.getDefaultMessage()
+            error.addError(f.getField(), f.getDefaultMessage());
+        }
 
         return ResponseEntity.status(status).body(error);
     }
