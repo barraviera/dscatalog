@@ -2,6 +2,7 @@ package com.devsuperior.dscatalog.resources;
 
 import com.devsuperior.dscatalog.dto.UserDTO;
 import com.devsuperior.dscatalog.dto.UserInsertDTO;
+import com.devsuperior.dscatalog.dto.UserUpdateDTO;
 import com.devsuperior.dscatalog.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,13 +92,12 @@ public class UserResource {
     // e tambem o corpo da requisição @RequestBody UserDTO dto
     // Este metodo irá retornar um UserDTO como mostra em ResponseEntity<UserDTO>
     @PutMapping(value = "/{id}")
-    public ResponseEntity<UserDTO> update(@Valid @PathVariable Long id, @RequestBody UserDTO dto) {
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
 
-        // No UserService teremos o metodo update que recebe um id e um UserDTO para fazer a atualização no banco
-        dto = service.update(id, dto);
+        UserDTO newDto = service.update(id, dto);
 
         // Vamos retornar uma resposta
-        return ResponseEntity.ok().body(dto);
+        return ResponseEntity.ok().body(newDto);
 
     }
 
