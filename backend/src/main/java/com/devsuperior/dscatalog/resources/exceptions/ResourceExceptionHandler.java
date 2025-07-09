@@ -62,7 +62,7 @@ public class ResourceExceptionHandler {
         error.setPath(request.getRequestURI()); // pega o caminho da requisição que deu erro
 
         // Retorna uma lista do tipo FieldErrors
-        // Pra cada elemento da lista de erros e.getBindingResult().getFieldErrors()
+        // Pra cada elemento da lista de erros do Beans Validation e.getBindingResult().getFieldErrors()
         // nós vamos usar o metodo addError da classe ValidationError pra adicionar
         // o campo e a mensagem na lista ist<FieldMessage> errors = new ArrayList<>();
         for (FieldError f : e.getBindingResult().getFieldErrors()) {
