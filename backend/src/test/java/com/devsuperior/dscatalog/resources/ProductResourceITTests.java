@@ -2,6 +2,7 @@ package com.devsuperior.dscatalog.resources;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.tests.Factory;
+import com.devsuperior.dscatalog.tests.TokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,11 @@ public class ProductResourceITTests {
     @Autowired
     private MockMvc mockMvc;
 
+    // Classe para geração de token para usarmos nos testes de
+    // updateShouldReturnProductDTOWhenIdExist e updateShouldReturnNotFoundWhenIdDoesNotExist
+    @Autowired
+    private TokenUtil tokenUtil;
+
     // Vamos usar pra converter um ProductDTO para um json pra passar na requisição put do
     // teste updateShouldReturnProductDTOWhenIdExist
     @Autowired
@@ -42,6 +48,9 @@ public class ProductResourceITTests {
     private long existingId;
     private long nonExistingId;
     private long countTotalProducts;
+
+    // Para gerar o token de teste
+    private String username, password, bearerToken;
 
     // METODOS ---
 
@@ -53,6 +62,14 @@ public class ProductResourceITTests {
         existingId = 1L;
         nonExistingId = 1000L;
         countTotalProducts = 25;
+
+        // Iniciar variaves para token de teste
+        username = "maria@gmail.com";
+        password = "123456";
+        // Geramos um token valido usando a classe TokenUtil e o metodo obtainAccessToken
+        // agora com um token válido na variavel bearerToken, vamos adicionar no cabeçalho
+        // do metodos updateShouldReturnProductDTOWhenIdExist e updateShouldReturnNotFoundWhenIdDoesNotExist
+        bearerToken = tokenUtil.obtainAccessToken(mockMvc, username, password);
     }
 
     @Test
@@ -95,6 +112,7 @@ public class ProductResourceITTests {
 
         // o put é uma requisição que tem um corpo(body)
         ResultActions result = mockMvc.perform(put("/products/{id}", existingId)
+                .header("Authorization", "Bearer " + bearerToken)
                 .content(jsonBody) // corpo da requisição
                 .contentType(MediaType.APPLICATION_JSON) // tipo do corpo da requisição
                 .accept(MediaType.APPLICATION_JSON)); // tipo do retorno da resposta
@@ -118,6 +136,7 @@ public class ProductResourceITTests {
 
         // o put é uma requisição que tem um corpo(body)
         ResultActions result = mockMvc.perform(put("/products/{id}", nonExistingId)
+                .header("Authorization", "Bearer " + bearerToken)
                 .content(jsonBody) // corpo da requisição
                 .contentType(MediaType.APPLICATION_JSON) // tipo do corpo da requisição
                 .accept(MediaType.APPLICATION_JSON)); // tipo do retorno da resposta
