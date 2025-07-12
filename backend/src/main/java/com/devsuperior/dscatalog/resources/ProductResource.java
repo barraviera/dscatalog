@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -66,6 +67,8 @@ public class ProductResource {
         return ResponseEntity.ok().body(dto);
     }
 
+    // Restrição de requisição por roles
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
     // Metodo para inserir categoria
     // Receberemos como parametro um objeto do tipo ProductDTO. É preciso colocar a anotação @RequestBody
     // A anotação @PostMapping é para quando for inserir
@@ -86,6 +89,8 @@ public class ProductResource {
         return ResponseEntity.created(uri).body(dto);
     }
 
+    // Restrição de requisição por roles
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
     // Metodo para atualizar categoria
     // A anotação @PutMapping é para quando for atualizar
     // Este metodo precisa receber o id da categoria a ser editada
@@ -102,6 +107,8 @@ public class ProductResource {
 
     }
 
+    // Restrição de requisição por roles
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
     // Metodo para deletar categoria
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<ProductDTO> delete(@PathVariable Long id) {

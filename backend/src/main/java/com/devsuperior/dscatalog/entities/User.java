@@ -1,19 +1,18 @@
 package com.devsuperior.dscatalog.entities;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 // A anotação @Entity trata esta classe como um mapeamento para uma tabela
 @Entity
 // A anotação @Table indica que esta classe irá representar uma tabela no banco de dados
 @Table(name = "tb_user")
-public class User implements Serializable {
-
-    private static final Long serialVersionUID = 1L;
+// Vamos implementar a interface UserDetails que é propria do spring security
+public class User implements UserDetails {
 
     // Atributos
 
@@ -90,10 +89,6 @@ public class User implements Serializable {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -115,4 +110,59 @@ public class User implements Serializable {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    // Metodo para adicionar um role
+    public void addRole(Role role) {
+        roles.add(role);
+    }
+
+    // Metodo pra testar se um usuario te determinado role
+    public boolean hasRole(String roleName) {
+        for(Role role : roles) {
+            if(role.getAuthority().equals(roleName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Metodos obrigatorios por implementar a interface UserDetails
+
+    // Neste metodo retornamos os role, que é uma coleção de roles que declaramos acima
+    // private Set<Role> roles = new HashSet<>();
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    // Retornar o email que é nosso username
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
 }

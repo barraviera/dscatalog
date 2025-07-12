@@ -1,9 +1,9 @@
 package com.devsuperior.dscatalog.services;
 
 import com.devsuperior.dscatalog.dto.*;
-import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Role;
 import com.devsuperior.dscatalog.entities.User;
+import com.devsuperior.dscatalog.projections.UserDetailsProjection;
 import com.devsuperior.dscatalog.repositories.RoleRepository;
 import com.devsuperior.dscatalog.repositories.UserRepository;
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
@@ -13,16 +13,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 // Essa anotação registrará esta classe como um componente que vai participar da injeção de dependência do spring
+// Vamos implementar o UserDetailsService do spring security
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     // Para fazer as buscas precisaremos da instacia do UserRepository
     @Autowired
@@ -31,7 +36,7 @@ public class UserService {
     private RoleRepository roleRepository;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     // Anotação que indica que as operações são somente leitura no banco. Isso ajuda o Spring a otimizar o desempenho e a evitar bloqueios desnecessários.
     // Usado em metodos que apenas leem dados findAll(), findById()...
@@ -171,5 +176,26 @@ public class UserService {
             // no final, chamando este metodo copyDtoToEntity, teremos um objeto User pronto
             // para ser salva ou atualizar quando precisar
         }
+    }
+
+    // Metodo obrigatorio por termos implementado a UserDetailsService
+    // este metodo busca no banco o usuario pelo nome de usuario
+    // se o usuario nao existir será lançado uma excessao chamada UsernameNotFoundException
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        List<UserDetailsProjection> result = repository.searchUserAndRolesByEmail(username);
+        if (result.size() == 0) {
+            throw new UsernameNotFoundException("Email not found");
+        }
+
+        User user = new User();
+        user.setEmail(result.get(0).getUsername());
+        user.setPassword(result.get(0).getPassword());
+        for (UserDetailsProjection projection : result) {
+            user.addRole(new Role(projection.getRoleId(), projection.getAuthority()));
+        }
+
+        return user;
     }
 }

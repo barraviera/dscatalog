@@ -1,17 +1,24 @@
 package com.devsuperior.dscatalog.entities;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serializable;
 import java.util.Objects;
 
+// @SuppressWarnings("serial")
 // A anotação @Entity trata esta classe como um mapeamento para uma tabela
 @Entity
 // A anotação @Table indica que esta classe irá representar uma tabela no banco de dados
 @Table(name = "tb_role")
-public class Role implements Serializable {
+// Vamos implementar a interface GrantedAuthority do spring security
+public class Role implements GrantedAuthority {
 
-    private static final Long serialVersionUID = 1L;
+    // O serializable é um recurso antigo do java que, quando a classe era um serializable,
+    // ela podia ser convertida em bytes, permitindo gravar o objeto em arquivo ou transferir em uma rede, etc
+    // o GrantedAuthority é uma classe serializable e ele pede um número de seria pra classe
+    // Ex. private static final long serialVersionUID = 1L;
+    // mas nao iremos utiliza-lo, caso apareça um erro em amarelo, coloque @SuppressWarnings("serial")
 
     // Atributos
 
@@ -45,6 +52,11 @@ public class Role implements Serializable {
         this.id = id;
     }
 
+    // Já tinhamos um metodo com o nome getAuthority
+    // mas ao implementar a classe GrantedAuthority ela iria pedir obrigatoriamente pra
+    // implementar este metodo, entao iremos colocar um @Override pra dizer que estamos sobrescrevendo
+    // e usando o metodo de GrantedAuthority
+    @Override
     public String getAuthority() {
         return authority;
     }

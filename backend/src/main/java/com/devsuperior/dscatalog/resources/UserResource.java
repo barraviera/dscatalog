@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -24,6 +25,8 @@ public class UserResource {
     @Autowired
     private UserService service;
 
+    // Restrição de acesso
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // O tipo de retorno deste metodo será um ResponseEntity que é um objeto do spring que vai encapsular uma resposta http
     // podemos indicar qual é o tipo de dado que estará no corpo desta resposta, que no caso iremos retornar uma lista de categoria List<UserDTO>
     // findAll é o nome do metodo
@@ -54,6 +57,8 @@ public class UserResource {
         return ResponseEntity.ok().body(list);
     }
 
+    // Restrição de acesso
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // Buscar categoria por id
     // Com esta anotação ficará /categories/id
     @GetMapping(value = "/{id}")
@@ -66,6 +71,8 @@ public class UserResource {
         return ResponseEntity.ok().body(dto);
     }
 
+    // Restrição de acesso
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // Metodo para inserir categoria
     // Receberemos como parametro um objeto do tipo UserDTO. É preciso colocar a anotação @RequestBody
     // A anotação @PostMapping é para quando for inserir
@@ -86,6 +93,8 @@ public class UserResource {
         return ResponseEntity.created(uri).body(newDto);
     }
 
+    // Restrição de acesso
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // Metodo para atualizar categoria
     // A anotação @PutMapping é para quando for atualizar
     // Este metodo precisa receber o id da categoria a ser editada
@@ -101,6 +110,8 @@ public class UserResource {
 
     }
 
+    // Restrição de acesso
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // Metodo para deletar categoria
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<UserDTO> delete(@PathVariable Long id) {
