@@ -30,21 +30,11 @@ public class CategoryService {
     // Anotação que indica que as operações são somente leitura no banco. Isso ajuda o Spring a otimizar o desempenho e a evitar bloqueios desnecessários.
     // Usado em metodos que apenas leem dados findAll(), findById()...
     @Transactional(readOnly = true)
-    // Metodo que busca todas as categorias e tem como retorno uma lista do tipo CategoryDTO
-    // findAllPaged(PageRequest pageRequest) vamos substituir o PageRequest por Pageable pageable
-    public Page<CategoryDTO> findAllPaged(Pageable pageable) {
-        // esse .findAll() ja é um metodo de busca pronto do Jpa, é só nós utilizarmos ele vai aceitar paginacao tambem, nao precisamos criar um
-        // metodo personalizado
-        // vamos atribuir os resultados à uma lista de Category
-        Page<Category> list = repository.findAll(pageable);
+    public List<CategoryDTO> findAll() {
 
-        // Vamos usar o .stream para converter a lista em um stream que permite trabalhar com funções de alta ordem(lambdas)
-        // no caso, vamos usar o .map que transforma cada elemento original da nossa lisa em uma outra coisa, aplicando uma função a cada elemento da lista
-        // x -> new CategoryDTO(x) = pra cada elemento da lista convertemos ele em um CategoryDTO
-        // .collect(Collectors.toList()); = agora vamos converter o stream novamente para uma lista
-        // Como o Page ja é um stream do java 8, vamos remover list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList()); o strem e o collect
-        return list.map(x -> new CategoryDTO(x));
+        List<Category> list = repository.findAll();
 
+        return list.stream().map(x -> new CategoryDTO(x)).toList();
     }
 
     // Busca categoria por id

@@ -23,34 +23,18 @@ import java.util.List;
 @RequestMapping(value = "/categories")
 public class CategoryResource {
 
+    // ATRIBUTOS ---
+
     // Vamos injetar a dependencia do CategoryService
     @Autowired
     private CategoryService service;
 
-    // O tipo de retorno deste metodo será um ResponseEntity que é um objeto do spring que vai encapsular uma resposta http
-    // podemos indicar qual é o tipo de dado que estará no corpo desta resposta, que no caso iremos retornar uma lista de categoria List<CategoryDTO>
-    // findAll é o nome do metodo
-    // Vamos usar o GetMapping pra indicar que este metodo é um endpoint
-    // Para usar paginação vamos trocar o retorno de List<CategoryDTO> para Page<CategoryDTO>
-    @GetMapping
-    public ResponseEntity<Page<CategoryDTO>> findAll(
-            // Usando o @RequestParam informamos que sao parametros opcionais
-            // @RequestParam(value = "page", defaultValue = "0") Integer page,
-            // @RequestParam(value = "linesPerPage", defaultValue = "12") Integer linesPerPage,
-            // @RequestParam(value = "direction", defaultValue = "ASC") String direction,
-            // @RequestParam(value = "orderBy", defaultValue = "name") String orderBy
-            // Vamos usar o pageable ao inves de informar parametro por parametro como acima
-            Pageable pageable
-    ) {
-        // O direction veio como string e vamos converter para o tipo Direction do spring
-        // apos usar o Pageable pageable nao precisamos mais dessa linha
-        //PageRequest pageRequest = PageRequest.of(page, linesPerPage, Sort.Direction.valueOf(direction), orderBy);
+    // METODOS ---
 
-        // Vamos usar o service.findAll(); para chamar o metodo que busca todas as categorias
-        // e guardamos em um List de Category
-        // Vamos trocar o nome do metodo service de findAll para findAllPaged
-        // e o tipo de retorno nao será mais um List como List<CategoryDTO>, mas sim um Page como Page<CategoryDTO>
-        Page<CategoryDTO> list = service.findAllPaged(pageable);
+    @GetMapping
+    public ResponseEntity<List<CategoryDTO>> findAll() {
+
+        List<CategoryDTO> list = service.findAll();
 
         // Vamos retornar uma resposta
         return ResponseEntity.ok().body(list);

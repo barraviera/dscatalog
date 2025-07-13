@@ -4,6 +4,7 @@ import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.projections.ProductProjection;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
@@ -12,12 +13,15 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 // Essa anotação registrará esta classe como um componente que vai participar da injeção de dependência do spring
@@ -30,28 +34,29 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    // Anotação que indica que as operações são somente leitura no banco. Isso ajuda o Spring a otimizar o desempenho e a evitar bloqueios desnecessários.
-    // Usado em metodos que apenas leem dados findAll(), findById()...
+
     @Transactional(readOnly = true)
-    // Metodo que busca todas as categorias e tem como retorno uma lista do tipo CategoryDTO
     public Page<ProductDTO> findAllPaged(
-            // PageRequest pageRequest
-            // ao inves de usarmos PageRequest, vamos usar o Pageable, pois estamos
-            // usando ele em ProductResource no metodo findAll
+            String name,
+            String categoryId,
             Pageable pageable
     ) {
-        // esse .findAll() ja é um metodo de busca pronto do Jpa, é só nós utilizarmos ele vai aceitar paginacao tambem, nao precisamos criar um
-        // metodo personalizado
-        // vamos atribuir os resultados à uma lista de Category
-        Page<Product> list = repository.findAll(pageable);
+        List<Long> categoryIds = Arrays.asList();
 
-        // Vamos usar o .stream para converter a lista em um stream que permite trabalhar com funções de alta ordem(lambdas)
-        // no caso, vamos usar o .map que transforma cada elemento original da nossa lisa em uma outra coisa, aplicando uma função a cada elemento da lista
-        // x -> new ProductDTO(x) = pra cada elemento da lista convertemos ele em um ProductDTO
-        // .collect(Collectors.toList()); = agora vamos converter o stream novamente para uma lista
-        // Como o Page ja é um stream do java 8, vamos remover list.stream().map(x -> new ProductDTO(x)).collect(Collectors.toList()); o strem e o collect
-        return list.map(x -> new ProductDTO(x));
+        if(!"0".equals(categoryId)) {
+            categoryIds = Arrays.asList(categoryId.split(",")).stream().map(
+                    Long::parseLong
+            ).toList();
+        }
 
+        Page<ProductProjection> page = repository.searchProducts(categoryIds, name, pageable);
+        List<Long> productIds = page.map(x -> x.getId()).toList();
+
+        List<Product> entities = repository.searchProductsWithCategories(productIds);
+        List<ProductDTO> dtos = entities.stream().map(p -> new ProductDTO(p, p.getCategories())).toList();
+
+        Page<ProductDTO> pageDto = new PageImpl<>(dtos, page.getPageable(), page.getTotalElements());
+        return pageDto;
     }
 
     // Busca categoria por id
