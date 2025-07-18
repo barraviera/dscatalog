@@ -9,6 +9,7 @@ import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
+import com.devsuperior.dscatalog.util.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -52,7 +53,12 @@ public class ProductService {
         Page<ProductProjection> page = repository.searchProducts(categoryIds, name, pageable);
         List<Long> productIds = page.map(x -> x.getId()).toList();
 
+        // Fazemos a consulta dos produtos passando os ids da pagina que buscamos acima
+        // este resultado estará desordenado
         List<Product> entities = repository.searchProductsWithCategories(productIds);
+        // Aqui geramos uma nova lista de entidades ordenada baseada na ordenadação da pagina
+        entities = Utils.replace(page.getContent(), entities);
+
         List<ProductDTO> dtos = entities.stream().map(p -> new ProductDTO(p, p.getCategories())).toList();
 
         Page<ProductDTO> pageDto = new PageImpl<>(dtos, page.getPageable(), page.getTotalElements());
