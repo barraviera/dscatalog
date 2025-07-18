@@ -1,5 +1,6 @@
 package com.devsuperior.dscatalog.entities;
 
+import com.devsuperior.dscatalog.projections.IdProjection;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -10,9 +11,10 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tb_product")
-public class Product implements Serializable {
+public class Product implements IdProjection<Long> {
 
-    private static final Long serialVersionUID = 1L;
+    // Não vamos mais usar
+    // private static final Long serialVersionUID = 1L;
 
     // Atributos
 
@@ -59,6 +61,7 @@ public class Product implements Serializable {
 
     // Getter e Setter
 
+    @Override
     public Long getId() {
         return id;
     }

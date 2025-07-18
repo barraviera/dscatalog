@@ -57,7 +57,7 @@ public class ProductService {
         // este resultado estará desordenado
         List<Product> entities = repository.searchProductsWithCategories(productIds);
         // Aqui geramos uma nova lista de entidades ordenada baseada na ordenadação da pagina
-        entities = Utils.replace(page.getContent(), entities);
+        entities = (List<Product>) Utils.replace(page.getContent(), entities);
 
         List<ProductDTO> dtos = entities.stream().map(p -> new ProductDTO(p, p.getCategories())).toList();
 
