@@ -72,13 +72,13 @@ public class UserResource {
     }
 
     // Restrição de acesso
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // Metodo para inserir categoria
     // Receberemos como parametro um objeto do tipo UserDTO. É preciso colocar a anotação @RequestBody
     // A anotação @PostMapping é para quando for inserir
     // o metodo insert recebe um UserInsertDTO, mas retorna um UserDTO
     @PostMapping
-    public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserInsertDTO dto) {
+    public ResponseEntity<UserDTO> insert(@RequestBody @Valid UserInsertDTO dto) {
 
         // No UserService teremos o metodo insert que recebe um UserDTO para fazer a inserção no banco
         UserDTO newDto = service.insert(dto);

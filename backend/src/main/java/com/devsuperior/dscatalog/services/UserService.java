@@ -95,6 +95,12 @@ public class UserService implements UserDetailsService {
         // vamos criar um metodo auxiliar copyDtoToEntity que faça isso
         copyDtoToEntity(entity, dto);
 
+        // Ignorar qualquer role que tenha vindo do json
+        entity.getRoles().clear();
+        // e vamos definir somente a permissao de Operator para o usuario que está se cadastrando
+        Role role = roleRepository.findByAuthority("ROLE_OPERATOR");
+        entity.getRoles().add(role);
+
         // Agora vamos salvar o objeto no banco
         entity = repository.save(entity);
 
