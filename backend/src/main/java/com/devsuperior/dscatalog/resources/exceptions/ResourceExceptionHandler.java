@@ -1,6 +1,7 @@
 package com.devsuperior.dscatalog.resources.exceptions;
 
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
+import com.devsuperior.dscatalog.services.exceptions.EmailException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -71,6 +72,21 @@ public class ResourceExceptionHandler {
             // pegar a mensagem de erro f.getDefaultMessage()
             error.addError(f.getField(), f.getDefaultMessage());
         }
+
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<StandardError> email(EmailException e, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        StandardError error = new StandardError();
+        error.setTimestamp(Instant.now());
+        error.setStatus(status.value()); // BAD_REQUEST é o erro 400
+        error.setError("Email exception");
+        error.setMessage(e.getMessage());
+        error.setPath(request.getRequestURI()); // pega o caminho da requisição que deu erro
 
         return ResponseEntity.status(status).body(error);
     }
