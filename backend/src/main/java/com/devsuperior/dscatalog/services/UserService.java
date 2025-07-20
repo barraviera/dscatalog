@@ -38,6 +38,9 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private AuthService authService;
+
     // Anotação que indica que as operações são somente leitura no banco. Isso ajuda o Spring a otimizar o desempenho e a evitar bloqueios desnecessários.
     // Usado em metodos que apenas leem dados findAll(), findById()...
     @Transactional(readOnly = true)
@@ -203,5 +206,12 @@ public class UserService implements UserDetailsService {
         }
 
         return user;
+    }
+
+    @Transactional(readOnly = true)
+    public UserDTO findMe() {
+
+        User entity = authService.authenticated();
+        return new UserDTO(entity);
     }
 }

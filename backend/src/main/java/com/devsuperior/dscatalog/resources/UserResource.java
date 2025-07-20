@@ -122,7 +122,16 @@ public class UserResource {
         // Vamos retornar a resposta sem corpo, pois no delete nao precisamos
         // será retornado um 204 -> retorno deu certo e o corpo será vazio
         return ResponseEntity.noContent().build();
+    }
 
+    // Restrição de acesso
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
+    @GetMapping(value = "/me")
+    public ResponseEntity<UserDTO> findMe() {
+
+        UserDTO dto = service.findMe();
+        // Vamos retornar uma resposta
+        return ResponseEntity.ok().body(dto);
     }
 
 
